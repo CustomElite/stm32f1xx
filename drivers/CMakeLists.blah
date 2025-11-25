@@ -1,0 +1,85 @@
+cmake_minimum_required(VERSION 3.22)
+
+enable_language(ASM C)
+
+set(STM32_MCU STM32F103xB)
+set(STM32_FAMILY STM32F1xx)
+
+#STM32 CPU Flags
+set(STM32_Flags
+    -march=armv7-m
+    -mcpu=cortex-m3
+    -mthumb
+    -mfloat-abi=soft
+)
+
+#STM32 Macros
+set(STM32_Defines
+    USE_FULL_LL_DRIVER
+    HSE_VALUE=8000000
+    HSE_STARTUP_TIMEOUT=100
+    LSE_STARTUP_TIMEOUT=5000
+    LSE_VALUE=32768
+    HSI_VALUE=8000000
+    LSI_VALUE=40000
+    VDD_VALUE=3300
+    PREFETCH_ENABLE=1
+    ${STM32_MCU}
+    $<$<CONFIG:Debug>:DEBUG>
+)
+
+#STM32F103XX Linker Script
+set(STM32_Linker_Script
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/STM32F103XX_FLASH.ld)
+
+set(STM32_Include_Dirs
+    ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS/st/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/${STM32_FAMILY}/include
+)
+
+set(STM32_Application_Src
+    ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS/st/src/syscalls.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS/st/src/sysmem.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS/st/src/system_stm32f1xx.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/${STM32_FAMILY}/startup_stm32f103xb.s
+)
+
+set(STM32_Drivers_Src
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_adc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_crc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_dac.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_dma.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_exti.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_gpio.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_i2c.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_pwr.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_rcc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_rtc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_spi.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_tim.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_usart.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32F1xx/src/stm32f1xx_ll_utils.c
+)
+
+# Interface library for includes and symbols
+add_library(STM32_Interface INTERFACE)
+target_compile_options(STM32_Interface INTERFACE ${STM32_Flags})
+target_compile_definitions(STM32_Interface INTERFACE ${STM32_Defines})
+target_include_directories(STM32_Interface INTERFACE ${STM32_Include_Dirs})
+target_link_options(STM32_Interface INTERFACE
+    -T${STM32_Linker_Script}
+    ${STM32_Flags}
+)
+
+# Create STM32_Drivers static library
+add_library(STM32_Drivers OBJECT)
+target_sources(STM32_Drivers PRIVATE ${STM32_Drivers_Src})
+target_link_libraries(STM32_Drivers PUBLIC STM32_Interface)
+
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${STM32_Application_Src})
+
+target_link_libraries(${CMAKE_PROJECT_NAME} STM32_Drivers)
+
+# Add the map file to the list of files to be removed with 'clean' target
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES ADDITIONAL_CLEAN_FILES ${CMAKE_PROJECT_NAME}.map)
