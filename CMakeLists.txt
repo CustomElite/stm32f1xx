@@ -65,13 +65,6 @@ set(STM32_Drivers_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_utils.c
 )
 
-add_library(${PROJECT_NAME}_HAL INTERFACE)
-add_library(${PROJECT_NAME}::HAL ALIAS ${PROJECT_NAME}_HAL)
-target_include_directories(${PROJECT_NAME}_HAL INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/hal)
-target_compile_options(${PROJECT_NAME}_HAL INTERFACE
-    $<$<COMPILE_LANGUAGE:CXX>: -fconcepts-diagnostics-depth=10>
-)
-
 # Interface library for includes and symbols
 add_library(${PROJECT_NAME}_AppInterface INTERFACE)
 add_library(${PROJECT_NAME}::AppInterface ALIAS ${PROJECT_NAME}_AppInterface)
@@ -92,6 +85,15 @@ target_sources(${PROJECT_NAME}_AppInterface INTERFACE
 add_library(${PROJECT_NAME}_Drivers STATIC ${STM32_Drivers_Src})
 add_library(${PROJECT_NAME}::Drivers ALIAS ${PROJECT_NAME}_Drivers)
 target_link_libraries(${PROJECT_NAME}_Drivers PUBLIC ${PROJECT_NAME}::AppInterface)
+
+add_library(${PROJECT_NAME}_HAL INTERFACE)
+add_library(${PROJECT_NAME}::HAL ALIAS ${PROJECT_NAME}_HAL)
+target_include_directories(${PROJECT_NAME}_HAL INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/hal)
+target_compile_options(${PROJECT_NAME}_HAL INTERFACE
+    $<$<COMPILE_LANGUAGE:CXX>: -fconcepts-diagnostics-depth=10>
+)
+target_link_libraries(${PROJECT_NAME}_HAL INTERFACE ${PROJECT_NAME}::Drivers
+)
 
 # Add the map file to the list of files to be removed with 'clean' target
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES ADDITIONAL_CLEAN_FILES ${CMAKE_PROJECT_NAME}.map)

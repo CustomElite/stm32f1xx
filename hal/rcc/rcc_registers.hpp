@@ -4,7 +4,7 @@
 
 #include "stm32f103xb.h"
 
-#include "../utils/hardware_register.hpp"
+#include "utils/hardware_register.hpp"
 
 namespace hal::rcc {
 

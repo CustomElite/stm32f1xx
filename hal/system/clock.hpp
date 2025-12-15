@@ -1,8 +1,9 @@
 #pragma once
 
-#include "stm32f1xx_ll_system.h"
+//#include "stm32f1xx_ll_system.h"
 
 #include "rcc/rcc_kernel.hpp"
+#include "flash/flash_kernel.hpp"
 #include "utils/utility.hpp"
 
 namespace hal::system {
@@ -90,10 +91,12 @@ namespace hal::system {
         clock() noexcept
         {
             if (not gBusInitialized) {
-                LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
-                while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_0); 
+                flash::kernel::SetLatency(0);
+                flash::kernel::PrefetchState(ENABLED);
+                //LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
+                //while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_0); 
 
-                LL_FLASH_EnablePrefetch();
+                //LL_FLASH_EnablePrefetch();
                 __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
 
                 rcc::kernel::SourceClockState<hclkSource>(ENABLED);
