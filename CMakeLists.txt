@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(STM32F103XX
-    VERSION 1.0.0
+    VERSION 1.1.0
     LANGUAGES ASM C CXX
 )
 
@@ -18,16 +18,13 @@ set(STM32_Flags
 
 #STM32F103 (BluePill) Macros
 set(STM32_Defines
-    #USE_FULL_LL_DRIVER
+    ${STM32_MCU}
     HSE_VALUE=8000000
-    HSE_STARTUP_TIMEOUT=100
-    LSE_STARTUP_TIMEOUT=5000
     LSE_VALUE=32768
     HSI_VALUE=8000000
     LSI_VALUE=40000
     VDD_VALUE=3300
     PREFETCH_ENABLE=1
-    ${STM32_MCU}
     $<$<CONFIG:Debug>:DEBUG>
 )
 
@@ -38,32 +35,15 @@ set(STM32_Linker_Script
 set(STM32_Startup_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/scripts/startup_stm32f103xb.s
 )
-set(STM32_Include_Dirs
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/st/include
-    #${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/include
-)
-set(STM32_Application_Src
+set(STM32_Required_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/st/src/syscalls.c
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/st/src/sysmem.c
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/st/src/system_stm32f1xx.c
 )
-#set(STM32_Drivers_Src
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_adc.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_crc.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_dac.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_dma.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_exti.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_gpio.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_i2c.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_pwr.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_rcc.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_rtc.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_spi.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_tim.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_usart.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_utils.c
-#)
+set(STM32_Include_Dirs
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/st/include
+)
 
 # Interface library for includes and symbols
 add_library(${PROJECT_NAME}_AppInterface INTERFACE)
@@ -78,22 +58,17 @@ target_link_options(${PROJECT_NAME}_AppInterface INTERFACE
 )
 target_sources(${PROJECT_NAME}_AppInterface INTERFACE 
     ${STM32_Startup_Src}
-    ${STM32_Application_Src}
+    ${STM32_Required_Src}
 )
 
-# Create STM32_Drivers static library
-#add_library(${PROJECT_NAME}_Drivers STATIC ${STM32_Drivers_Src})
-#add_library(${PROJECT_NAME}::Drivers ALIAS ${PROJECT_NAME}_Drivers)
-#target_link_libraries(${PROJECT_NAME}_Drivers PUBLIC ${PROJECT_NAME}::AppInterface)
-
-add_library(${PROJECT_NAME}_HAL INTERFACE)
+# HAL Library
+add_library(${PROJECT_NAME}_HAL STATIC)
 add_library(${PROJECT_NAME}::HAL ALIAS ${PROJECT_NAME}_HAL)
-target_include_directories(${PROJECT_NAME}_HAL INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/hal)
-target_compile_options(${PROJECT_NAME}_HAL INTERFACE
+target_include_directories(${PROJECT_NAME}_HAL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/hal)
+target_compile_options(${PROJECT_NAME}_HAL PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>: -fconcepts-diagnostics-depth=10>
 )
-target_link_libraries(${PROJECT_NAME}_HAL INTERFACE ${PROJECT_NAME}::AppInterface)
-#target_link_libraries(${PROJECT_NAME}_HAL INTERFACE ${PROJECT_NAME}::Drivers)
+target_link_libraries(${PROJECT_NAME}_HAL PUBLIC ${PROJECT_NAME}::AppInterface)
 
 # Add the map file to the list of files to be removed with 'clean' target
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES ADDITIONAL_CLEAN_FILES ${CMAKE_PROJECT_NAME}.map)
