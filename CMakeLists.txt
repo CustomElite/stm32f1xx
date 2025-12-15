@@ -41,29 +41,29 @@ set(STM32_Startup_Src
 set(STM32_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/include
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/st/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/include
+    #${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/include
 )
 set(STM32_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/st/src/syscalls.c
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/st/src/sysmem.c
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/CMSIS/st/src/system_stm32f1xx.c
 )
-set(STM32_Drivers_Src
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_adc.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_crc.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_dac.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_dma.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_exti.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_gpio.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_i2c.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_pwr.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_rcc.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_rtc.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_spi.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_tim.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_usart.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_utils.c
-)
+#set(STM32_Drivers_Src
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_adc.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_crc.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_dac.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_dma.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_exti.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_gpio.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_i2c.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_pwr.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_rcc.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_rtc.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_spi.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_tim.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_usart.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/${STM32_FAMILY}/src/stm32f1xx_ll_utils.c
+#)
 
 # Interface library for includes and symbols
 add_library(${PROJECT_NAME}_AppInterface INTERFACE)
@@ -82,9 +82,9 @@ target_sources(${PROJECT_NAME}_AppInterface INTERFACE
 )
 
 # Create STM32_Drivers static library
-add_library(${PROJECT_NAME}_Drivers STATIC ${STM32_Drivers_Src})
-add_library(${PROJECT_NAME}::Drivers ALIAS ${PROJECT_NAME}_Drivers)
-target_link_libraries(${PROJECT_NAME}_Drivers PUBLIC ${PROJECT_NAME}::AppInterface)
+#add_library(${PROJECT_NAME}_Drivers STATIC ${STM32_Drivers_Src})
+#add_library(${PROJECT_NAME}::Drivers ALIAS ${PROJECT_NAME}_Drivers)
+#target_link_libraries(${PROJECT_NAME}_Drivers PUBLIC ${PROJECT_NAME}::AppInterface)
 
 add_library(${PROJECT_NAME}_HAL INTERFACE)
 add_library(${PROJECT_NAME}::HAL ALIAS ${PROJECT_NAME}_HAL)
@@ -92,8 +92,7 @@ target_include_directories(${PROJECT_NAME}_HAL INTERFACE ${CMAKE_CURRENT_SOURCE_
 target_compile_options(${PROJECT_NAME}_HAL INTERFACE
     $<$<COMPILE_LANGUAGE:CXX>: -fconcepts-diagnostics-depth=10>
 )
-target_link_libraries(${PROJECT_NAME}_HAL INTERFACE ${PROJECT_NAME}::Drivers
-)
+#target_link_libraries(${PROJECT_NAME}_HAL INTERFACE ${PROJECT_NAME}::Drivers)
 
 # Add the map file to the list of files to be removed with 'clean' target
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES ADDITIONAL_CLEAN_FILES ${CMAKE_PROJECT_NAME}.map)
