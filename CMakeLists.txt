@@ -92,7 +92,7 @@ target_include_directories(${PROJECT_NAME}_HAL INTERFACE ${CMAKE_CURRENT_SOURCE_
 target_compile_options(${PROJECT_NAME}_HAL INTERFACE
     $<$<COMPILE_LANGUAGE:CXX>: -fconcepts-diagnostics-depth=10>
 )
-target_link_libraries(${PROJECT_NAME}_Drivers PUBLIC ${PROJECT_NAME}::AppInterface)
+target_link_libraries(${PROJECT_NAME}_HAL INTERFACE ${PROJECT_NAME}::AppInterface)
 #target_link_libraries(${PROJECT_NAME}_HAL INTERFACE ${PROJECT_NAME}::Drivers)
 
 # Add the map file to the list of files to be removed with 'clean' target
